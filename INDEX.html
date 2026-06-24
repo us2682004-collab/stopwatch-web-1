@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stopwatch</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#050816,#0f172a,#2d0b45);
+overflow:hidden;
+transition:.5s;
+}
+
+body.light{
+background:linear-gradient(135deg,#eaf4ff,#ffffff,#dfe9f3);
+}
+
+.bg1,.bg2{
+position:absolute;
+border-radius:50%;
+filter:blur(120px);
+z-index:-1;
+}
+
+.bg1{
+width:400px;
+height:400px;
+background:#00d4ff;
+top:-100px;
+left:-100px;
+animation:move1 8s infinite alternate;
+}
+
+.bg2{
+width:400px;
+height:400px;
+background:#ff00ff;
+right:-100px;
+bottom:-100px;
+animation:move2 8s infinite alternate;
+}
+
+@keyframes move1{
+from{transform:translate(0,0);}
+to{transform:translate(100px,80px);}
+}
+
+@keyframes move2{
+from{transform:translate(0,0);}
+to{transform:translate(-100px,-80px);}
+}
+
+.container{
+width:90%;
+max-width:750px;
+padding:30px;
+border-radius:30px;
+text-align:center;
+background:rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border:1px solid rgba(255,255,255,.15);
+box-shadow:0 0 30px rgba(0,255,255,.25);
+animation:glow 3s infinite alternate;
+}
+
+@keyframes glow{
+from{box-shadow:0 0 20px #00e5ff;}
+to{box-shadow:0 0 45px #ff00ff;}
+}
+
+h1{
+font-size:3rem;
+background:linear-gradient(90deg,#00e5ff,#ff4dff);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.dateTime{
+color:white;
+margin-top:10px;
+font-size:18px;
+}
+
+.light .dateTime{
+color:black;
+}
+
+.circle{
+width:260px;
+height:260px;
+border-radius:50%;
+margin:25px auto;
+display:flex;
+justify-content:center;
+align-items:center;
+background:conic-gradient(#00e5ff 0deg,#ff00ff 180deg,#222 360deg);
+padding:10px;
+}
+
+.inner{
+width:100%;
+height:100%;
+border-radius:50%;
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+}
+
+.light .inner{
+background:white;
+}
+
+#display{
+font-size:2.2rem;
+font-weight:bold;
+color:white;
+}
+
+.light #display{
+color:black;
+}
+
+.buttons{
+display:flex;
+justify-content:center;
+gap:12px;
+flex-wrap:wrap;
+margin-top:20px;
+}
+
+button{
+padding:14px 22px;
+border:none;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+transition:.3s;
+color:white;
+}
+
+button:hover{
+transform:translateY(-4px);
+}
+
+.start{background:#00c853;}
+.pause{background:#ff9800;}
+.reset{background:#ff1744;}
+.lap{background:#2979ff;}
+.download{background:#8e24aa;}
+.theme{background:#444;}
+
+.laps{
+margin-top:20px;
+max-height:220px;
+overflow-y:auto;
+text-align:left;
+}
+
+.laps li{
+list-style:none;
+padding:10px;
+margin:8px 0;
+border-radius:10px;
+background:rgba(255,255,255,.1);
+color:white;
+}
+
+.light .laps li{
+background:#ddd;
+color:black;
+}
+
+@media(max-width:600px){
+
+h1{
+font-size:2rem;
+}
+
+.circle{
+width:220px;
+height:220px;
+}
+
+#display{
+font-size:1.5rem;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="bg1"></div>
+<div class="bg2"></div>
+
+<div class="container">
+
+<h1>⏱Stopwatch </h1>
+
+<div class="dateTime" id="dateTime"></div>
+
+<div class="circle">
+<div class="inner">
+<div id="display">00:00:00:000</div>
+</div>
+</div>
+
+<div class="buttons">
+<button class="start" onclick="startTimer()">▶ Start</button>
+<button class="pause" onclick="pauseTimer()">⏸ Pause</button>
+<button class="reset" onclick="resetTimer()">🔄 Reset</button>
+<button class="lap" onclick="lapTimer()">🏁 Lap</button>
+</div>
+
+<ul class="laps" id="laps"></ul>
+
+</div>
+
+<script>
+
+let startTime;
+let elapsedTime=0;
+let timerInterval;
+
+function timeToString(time){
+
+let hrs=Math.floor(time/3600000);
+let mins=Math.floor((time%3600000)/60000);
+let secs=Math.floor((time%60000)/1000);
+let ms=Math.floor(time%1000);
+
+return(
+String(hrs).padStart(2,'0')+":"+
+String(mins).padStart(2,'0')+":"+
+String(secs).padStart(2,'0')+":"+
+String(ms).padStart(3,'0')
+);
+}
+
+function print(txt){
+document.getElementById("display").innerHTML=txt;
+}
+
+function startTimer(){
+
+if(timerInterval) return;
+
+startTime=Date.now()-elapsedTime;
+
+timerInterval=setInterval(()=>{
+
+elapsedTime=Date.now()-startTime;
+print(timeToString(elapsedTime));
+
+},10);
+}
+
+function pauseTimer(){
+clearInterval(timerInterval);
+timerInterval=null;
+}
+
+function resetTimer(){
+
+clearInterval(timerInterval);
+timerInterval=null;
+
+elapsedTime=0;
+
+print("00:00:00:000");
+
+document.getElementById("laps").innerHTML="";
+}
+
+function lapTimer(){
+
+if(elapsedTime===0) return;
+
+let li=document.createElement("li");
+
+li.innerHTML=
+"Lap "+
+(document.querySelectorAll('#laps li').length+1)
++" ➜ "+
+timeToString(elapsedTime);
+
+document.getElementById("laps").prepend(li);
+}
+
+function toggleTheme(){
+document.body.classList.toggle("light");
+}
+
+function updateDateTime(){
+
+const now=new Date();
+
+document.getElementById("dateTime").innerHTML=
+now.toLocaleDateString()+" | "+
+now.toLocaleTimeString();
+}
+
+setInterval(updateDateTime,1000);
+
+function downloadLaps(){
+
+let laps=document.querySelectorAll("#laps li");
+
+let text="Lap Times\n\n";
+
+laps.forEach(l=>{
+text+=l.innerText+"\n";
+});
+
+let blob=new Blob([text],{type:"text/plain"});
+
+let a=document.createElement("a");
+
+a.href=URL.createObjectURL(blob);
+
+a.download="LapTimes.txt";
+
+a.click();
+}
+
+document.addEventListener("keydown",(e)=>{
+
+if(e.code==="Space"){
+
+e.preventDefault();
+
+if(timerInterval){
+pauseTimer();
+}else{
+startTimer();
+}
+}
+
+if(e.key==="r" || e.key==="R"){
+resetTimer();
+}
+
+});
+
+updateDateTime();
+
+</script>
+
+</body>
+</html>
